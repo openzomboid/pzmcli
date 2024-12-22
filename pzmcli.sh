@@ -157,19 +157,7 @@ function self_install() {
   wget -q -O "${install_dir}/pzmcli" "${PZMCLI_SOURCE_LINK}/pzmcli.sh"
   chmod +x "${install_dir}/pzmcli"
 
-  grep -qxF '# pzmcli' $HOME/.profile || {
-    echo "${INFO} add pzmcli to PATH"
-
-    bash -c "cat <<'EOF' >> $HOME/.profile
-
-# pzmcli
-if [ -d \"${install_dir}\" ] ; then
-    PATH=\"\$PATH:${install_dir}\"
-fi
-EOF"
-
-    source "$HOME/.profile"
-  }
+  ln -s "${install_dir}/pzmcli" "$HOME/.local/bin/pzmcli"
 
   echo "${OK} pzmcli successfully installed"
 }
