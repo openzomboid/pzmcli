@@ -3,3 +3,5 @@
 
 devtools/
 .tmp/
+
+config-local.sh
