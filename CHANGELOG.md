@@ -5,4 +5,4 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
-[Unreleased]: https://github.com/openzomboid/pzmcli/compare/tail...HEAD
+[Unreleased]: https://github.com/openzomboid/pzmcli/compare/da559c21d2f2a59deaeae5d986f0fde5add2c882...HEAD
