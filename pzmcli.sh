@@ -149,13 +149,13 @@ function create_folders() {
 }
 
 function self_download() {
-    local install_dir=$1
-    if [ ! "$(is_dir_exist "${install_dir}")" == "true" ]; then
-      echo "${ER} ${install_dir} is not exists"; return 0
-    fi
+  local install_dir=$1
+  if [ ! "$(is_dir_exist "${install_dir}")" == "true" ]; then
+    echo "${ER} ${install_dir} is not exists"; return 0
+  fi
 
-    wget -q -O "${install_dir}/pzmcli" "${PZMCLI_SOURCE_LINK}/pzmcli.sh"
-    chmod +x "${install_dir}/pzmcli"
+  wget -q -O "${install_dir}/pzmcli" "${PZMCLI_SOURCE_LINK}/pzmcli.sh"
+  chmod +x "${install_dir}/pzmcli"
 }
 
 function self_install() {
