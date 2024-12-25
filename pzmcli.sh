@@ -182,8 +182,8 @@ function self_update() {
   rm -rf "${update_dir}"
   mkdir -p "${update_dir}"
 
-  wget -q -O "${update_dir}/pzmcli" "${PZMCLI_SOURCE_LINK}/pzmcli.sh"
-  chmod +x "${update_dir}/pzmcli"
+  # Download pzmcli.
+  self_download "${update_dir}"
 
   local new_version; new_version=$(grep "^VERSION" "${update_dir}/pzmcli" | awk -F'[="]' '{print $3}')
 
