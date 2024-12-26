@@ -20,9 +20,14 @@ GREEN='\033[0;32m'; RED='\033[0;31m'; YELLOW='\033[0;33m'; BLUE='\033[0;36m'; NC
 # Message types. Used when displaying messages in stdout.
 OK=$(echo -e "[ ${GREEN} OK ${NC} ]"); ER=$(echo -e "[ ${RED} ER ${NC} ]"); WARN=$(echo -e "[ ${YELLOW} YELLOW ${NC} ]"); INFO=$(echo -e "[ ${BLUE}INFO${NC} ]")
 
-BASEDIR=$(dirname "$(readlink -f "${BASH_SOURCE[@]}")")
+FULL_FILE=$(readlink -f "${BASH_SOURCE[@]}")
+BASEDIR=$(dirname "${FULL_FILE}")
+BASEFILE=$(basename "${FULL_FILE}")
+
 SCRIPT_LOCATION=${BASEDIR}
 MOD_LOCATION=${BASEDIR}
+
+DEFAULT_INSTALL_DIR=~/pzmcli
 
 # NOW is the current date and time in default format Y%m%d_%H%M%S.
 # You can change format in config file.
@@ -31,7 +36,7 @@ NOW=$(date "+%Y%m%d_%H%M%S")
 # TIMESTAMP is current timestamp.
 TIMESTAMP=$(date "+%s")
 
-ENV_FILE="${BASEDIR}/.env"
+ENV_FILE="${SCRIPT_LOCATION}/.env"
 
 # Import env file if exists.
 # shellcheck source=.env
@@ -97,7 +102,9 @@ function print_variables() {
 
   echo "${INFO} NOW:       ${NOW}"
   echo "${INFO} TIMESTAMP: ${TIMESTAMP}"
+  echo "${INFO} FULL_FILE: ${FULL_FILE}"
   echo "${INFO} BASEDIR:   ${BASEDIR}"
+  echo "${INFO} BASEFILE:  ${BASEFILE}"
   echo "${INFO}"
 
   echo "${INFO} SCRIPT_LOCATION:    ${SCRIPT_LOCATION}$(check_dir "${SCRIPT_LOCATION}")"
@@ -109,6 +116,9 @@ function print_variables() {
 
   echo "${INFO} MOD_LOCATION: ${MOD_LOCATION}$(check_dir "${MOD_LOCATION}")"
   echo "${INFO} DIR_TESTS:    ${DIR_TESTS}$(check_dir "${DIR_TESTS}")"
+
+  echo "${INFO} " # .env
+  echo "${INFO} DEFAULT_INSTALL_DIR: ${DEFAULT_INSTALL_DIR}$(check_dir "${DEFAULT_INSTALL_DIR}")"
 }
 
 # print_version prints versions.
@@ -148,42 +158,37 @@ function create_folders() {
   echo "${OK} folders created"
 }
 
-function self_download() {
-  local install_dir=$1
-  if [ ! "$(is_dir_exist "${install_dir}")" == "true" ]; then
-    echo "${ER} ${install_dir} is not exists"; return 0
-  fi
-
-  wget -q -O "${install_dir}/pzmcli" "${PZMCLI_SOURCE_LINK}/pzmcli.sh"
-  chmod +x "${install_dir}/pzmcli"
-}
-
 function self_install() {
-  local install_dir=$1
+  local install_dir=$DEFAULT_INSTALL_DIR
   if [ "$(is_dir_exist "${install_dir}")" == "true" ]; then
     echo "${ER} ${install_dir} already exists"; return 0
   fi
 
+  echo "${INFO} installing pzmcli in ${install_dir}";
+
   mkdir -p "${install_dir}"
-
-  # Download pzmcli.
-  self_download "${install_dir}"
-
+  cp "${SCRIPT_LOCATION}/pzmcli.sh" "${install_dir}/pzmcli"
   ln -s "${install_dir}/pzmcli" "$HOME/.local/bin/pzmcli"
 
-  echo "${OK} pzmcli successfully installed"
+  echo "${OK} dev upgrade pzmcli in ${install_dir} succes";
+
+  pzmcli self-update
 }
 
 # self_update downloads pzmcli updates from repository.
 # TODO: Add chose tags: version|latest|develop.
 function self_update() {
+  if [ "${BASEFILE}" == "pzmcli.sh" ]; then
+    echo "${ER} prod functions is not allowed"; return 0
+  fi
+
   local update_dir="${DIR_STATE}/update"
 
   rm -rf "${update_dir}"
   mkdir -p "${update_dir}"
 
-  # Download pzmcli.
-  self_download "${update_dir}"
+  wget -q -O "${install_dir}/pzmcli" "${PZMCLI_SOURCE_LINK}/pzmcli.sh"
+  chmod +x "${install_dir}/pzmcli"
 
   local new_version; new_version=$(grep "^VERSION" "${update_dir}/pzmcli" | awk -F'[="]' '{print $3}')
 
@@ -202,24 +207,72 @@ function self_update() {
   rm -rf "${update_dir}"
 }
 
+function self_update_dev() {
+  if [ "${BASEFILE}" == "pzmcli" ]; then
+    echo "${ER} dev functions is not allowed"; return 0
+  fi
+
+  local install_dir=$DEFAULT_INSTALL_DIR
+  if [ ! "$(is_dir_exist "${install_dir}")" == "true" ]; then
+    echo "${ER} ${install_dir} is not exists"; return 0
+  fi
+
+  if [ ! "$(is_file_exist "${install_dir}/pzmcli")" == "true" ]; then
+    echo "${ER} ${install_dir}/pzmcli is not exists"; return 0
+  fi
+
+  echo "${INFO} dev upgrading pzmcli in ${install_dir}";
+
+  cp "${SCRIPT_LOCATION}/pzmcli.sh" "${install_dir}/pzmcli"
+
+  echo "${OK} dev upgrade pzmcli in ${install_dir} succes";
+}
+
+function self_uninstall() {
+  if [ "${BASEFILE}" == "pzmcli.sh" ]; then
+    echo "${ER} prod functions is not allowed"; return 0
+  fi
+
+  local install_dir=$SCRIPT_LOCATION
+  if [ ! "$(is_file_exist "${install_dir}/pzmcli")" == "true" ]; then
+    echo "${ER} ${install_dir}/pzmcli is not exists"; return 0
+  fi
+
+  echo "${INFO} uninstalling pzmcli from ${install_dir}";
+
+  rm "$HOME/.local/bin/pzmcli"
+  rm -rf "${install_dir}"
+
+  echo "${OK} uninstall pzmcli from ${install_dir} succes";
+}
+
 # main contains a proxy for entering permissible functions.
 function main() {
-  case "$1" in
-    -s)
-      BASEDIR="${BASEDIR}/gameservers/$2"
-
-      shift
-      shift
-      ;;
-  esac
-
   init_variables
 
   case "$1" in
     self-install)
-      self_install "$2" ;;
+      self_install ;;
     self-update)
-      self_update ;;
+      local is_dev="false"
+
+      while [[ -n "$2" ]]; do
+        case "$2" in
+          --dev|dev) is_dev="true"; shift ;;
+        esac
+
+        shift
+      done
+
+      if [ "${is_dev}" == "true" ]; then
+        self_update_dev
+      else
+        self_update
+      fi ;;
+    self-update-dev)
+      self_update_dev ;;
+    self-uninstall)
+      self_uninstall ;;
     --variables|--vars)
       print_variables ;;
     --version)

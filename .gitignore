@@ -3,5 +3,6 @@
 
 devtools/
 .tmp/
+.env
 
 config-local.sh
