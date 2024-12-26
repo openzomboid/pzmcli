@@ -269,8 +269,6 @@ function main() {
       else
         self_update
       fi ;;
-    self-update-dev)
-      self_update_dev ;;
     self-uninstall)
       self_uninstall ;;
     --variables|--vars)
