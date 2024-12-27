@@ -1,0 +1,8 @@
+.idea/
+.vscode/
+
+devtools/
+.tmp/
+.env
+
+config-local.sh

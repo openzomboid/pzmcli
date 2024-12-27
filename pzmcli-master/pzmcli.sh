@@ -68,8 +68,7 @@ function init_variables() {
   DIR_STATE="${SCRIPT_LOCATION}/state"
   DIR_CONFIG="${SCRIPT_LOCATION}/config"
   FILE_PZMCLI_CONFIG="${SCRIPT_LOCATION}/pzmcli.cfg"
-  [ -z "${PZMCLI_SOURCE_LINK}" ] && PZMCLI_SOURCE_LINK="https://github.com/openzomboid/pzmcli/"
-  [ -z "${PZMCLI_SOURCE_LINK_RAW}" ] && PZMCLI_SOURCE_LINK_RAW="https://raw.githubusercontent.com/openzomboid/pzmcli/master"
+  [ -z "${PZMCLI_SOURCE_LINK}" ] && PZMCLI_SOURCE_LINK="https://raw.githubusercontent.com/openzomboid/pzmcli/master"
 
   # Mod definitions.
   DIR_TESTS="${MOD_LOCATION}/tests"
@@ -146,7 +145,6 @@ function create_folders() {
 # TODO: Add chose tags: version|latest|develop.
 function self_install() {
   local install_dir=$DEFAULT_INSTALL_DIR
-  rm -rf "${install_dir}" && rm -f "$HOME/.local/bin/pzmcli" # TODO: Remove me.
   if [ "$(is_dir_exist "${install_dir}")" == "true" ]; then
     echo "${ER} ${install_dir} already exists"; return 0
   fi
@@ -154,22 +152,12 @@ function self_install() {
   echo "${INFO} installing pzmcli in ${install_dir}";
 
   mkdir -p "${install_dir}"
-
-  # curl -L -o ./.tmp/master.tar.gz https://github.com/openzomboid/pzmcli/archive/master.tar.gz
-  curl -L -o "${install_dir}/master.tar.gz" "${PZMCLI_SOURCE_LINK}/archive/master.tar.gz" || {
-    # Retry.
-    curl -L -o "${install_dir}/master.tar.gz" "${PZMCLI_SOURCE_LINK}/archive/master.tar.gz"
-  }
-  tar -zxvf "${install_dir}/master.tar.gz" -C "${install_dir}"
-  mv -v "${install_dir}"/pzmcli-master/* "${install_dir}/" 1> /dev/null
-  mv "${install_dir}/pzmcli.sh" "${install_dir}/pzmcli"
-
-  rm -rf ${install_dir}/pzmcli-master
-  rm -rf ${install_dir}/master.tar.gz
-
+  cp "${SCRIPT_LOCATION}/pzmcli.sh" "${install_dir}/pzmcli"
   ln -s "${install_dir}/pzmcli" "$HOME/.local/bin/pzmcli"
 
-  echo "${OK} install pzmcli in ${install_dir} succes";
+  echo "${OK} dev upgrade pzmcli in ${install_dir} succes";
+
+  pzmcli self-update
 }
 
 # self_update downloads pzmcli updates from repository.
@@ -185,8 +173,8 @@ function self_update() {
   rm -rf "${update_dir}"
   mkdir -p "${update_dir}"
 
-  wget -q -O "${update_dir}/pzmcli" "${PZMCLI_SOURCE_LINK_RAW}/pzmcli.sh"
-  chmod +x "${update_dir}/pzmcli"
+  wget -q -O "${install_dir}/pzmcli" "${PZMCLI_SOURCE_LINK}/pzmcli.sh"
+  chmod +x "${install_dir}/pzmcli"
 
   local new_version; new_version=$(grep "^VERSION" "${update_dir}/pzmcli" | awk -F'[="]' '{print $3}')
 
