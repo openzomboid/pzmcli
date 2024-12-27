@@ -22,6 +22,9 @@ OK=$(echo -e "[ ${GREEN} OK ${NC} ]"); ER=$(echo -e "[ ${RED} ER ${NC} ]"); WARN
 
 FULL_FILE=$(readlink -f "${BASH_SOURCE[@]}")
 BASEDIR=$(dirname "${FULL_FILE}")
+if [ "${BASEDIR}" == "." ]; then
+    BASEDIR=$(dirname "$BASH_SOURCE")
+fi
 BASEFILE=$(basename "${FULL_FILE}")
 
 SCRIPT_LOCATION=${BASEDIR}
@@ -43,24 +46,6 @@ ENV_FILE="${SCRIPT_LOCATION}/.env"
 test -f "${ENV_FILE}" && . "${ENV_FILE}"
 
 fn_exists() { declare -F "$1" > /dev/null; }
-
-# echoerr prints red error message to stderr and FILE_PZLSM_LOG file.
-function echoerr() {
-  echo "${ER} $1"
-  if [ "${WRITE_PZLSM_LOGS}" == "true" ]; then
-    mkdir -p "${DIR_LOGS}"
-    echo "[$(date "+%Y-%m-%d %H:%M:%S")] $0 - $1" >> "${FILE_PZLSM_LOG}"
-  fi
-}
-
-# echowarn prints yellow error message to stderr and FILE_PZLSM_LOG file.
-function echowarn() {
-  echo "${WARN} $1"
-  if [ "${WRITE_PZLSM_LOGS}" == "true" ]; then
-    mkdir -p "${DIR_LOGS}"
-    echo "[$(date "+%Y-%m-%d %H:%M:%S")] $0 - $1" >> "${FILE_PZLSM_LOG}"
-  fi
-}
 
 # is_dir_exist returns true if directory is exist.
 function is_dir_exist() {
@@ -158,6 +143,8 @@ function create_folders() {
   echo "${OK} folders created"
 }
 
+# self_install installs pzmcli from repository.
+# TODO: Add chose tags: version|latest|develop.
 function self_install() {
   local install_dir=$DEFAULT_INSTALL_DIR
   if [ "$(is_dir_exist "${install_dir}")" == "true" ]; then
@@ -177,6 +164,7 @@ function self_install() {
 
 # self_update downloads pzmcli updates from repository.
 # TODO: Add chose tags: version|latest|develop.
+# Allowed only for production mode.
 function self_update() {
   if [ "${BASEFILE}" == "pzmcli.sh" ]; then
     echo "${ER} prod functions is not allowed"; return 0
@@ -193,7 +181,7 @@ function self_update() {
   local new_version; new_version=$(grep "^VERSION" "${update_dir}/pzmcli" | awk -F'[="]' '{print $3}')
 
   if [ -z "${new_version}" ]; then
-    echoerr "self_update: failed to download pzmcli update"; return 1
+    echo "${ER} self_update: failed to download pzmcli update"; return 1
   fi
 
   if [ "${VERSION}" \< "${new_version}" ]; then
@@ -207,6 +195,8 @@ function self_update() {
   rm -rf "${update_dir}"
 }
 
+# self_update_dev downloads pzmcli updates from local files.
+# Allowed only for developer mode.
 function self_update_dev() {
   if [ "${BASEFILE}" == "pzmcli" ]; then
     echo "${ER} dev functions is not allowed"; return 0
@@ -228,6 +218,8 @@ function self_update_dev() {
   echo "${OK} dev upgrade pzmcli in ${install_dir} succes";
 }
 
+# self_uninstall removes pzmcli.
+# Allowed only for production mode.
 function self_uninstall() {
   if [ "${BASEFILE}" == "pzmcli.sh" ]; then
     echo "${ER} prod functions is not allowed"; return 0
