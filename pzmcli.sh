@@ -67,7 +67,6 @@ function init_variables() {
   # Project Zomboid Mod CLI definitions.
   DIR_STATE="${SCRIPT_LOCATION}/state"
   DIR_CONFIG="${SCRIPT_LOCATION}/config"
-  DIR_LOGS="${SCRIPT_LOCATION}/logs"
   FILE_PZMCLI_CONFIG="${SCRIPT_LOCATION}/pzmcli.cfg"
   [ -z "${PZMCLI_SOURCE_LINK}" ] && PZMCLI_SOURCE_LINK="https://raw.githubusercontent.com/openzomboid/pzmcli/master"
 
@@ -94,7 +93,6 @@ function print_variables() {
 
   echo "${INFO} SCRIPT_LOCATION:    ${SCRIPT_LOCATION}$(check_dir "${SCRIPT_LOCATION}")"
   echo "${INFO} DIR_STATE:          ${DIR_STATE}$(check_dir "${DIR_STATE}")"
-  echo "${INFO} DIR_LOGS:           ${DIR_LOGS}$(check_dir "${DIR_LOGS}")"
   echo "${INFO} DIR_CONFIG:         ${DIR_CONFIG}$(check_dir "${DIR_CONFIG}")"
   echo "${INFO} FILE_PZMCLI_CONFIG: ${FILE_PZMCLI_CONFIG}$(check_file "${FILE_PZMCLI_CONFIG}")"
   echo "${INFO}"
