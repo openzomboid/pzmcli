@@ -248,6 +248,47 @@ function self_uninstall() {
   echo "${OK} uninstall pzmcli from ${install_dir} succes";
 }
 
+
+# TESTS RUNNER
+FAIL=$(echo -e "[\033[0;31m fail \033[0m]")
+
+function get_pz_path() {
+  local search_label="/media/lua/shared/luautils.lua"
+
+  # Exclude directories from search where Project Zomboid cannot be installed.
+  local excluded=(/proc /tmp /dev /sys /snap /etc /var /run /snap /boot)
+  for ex in "${excluded[@]}"; do
+    excluded_args="${excluded_args} -path ${ex} -prune -o"
+  done
+
+  # WARNING: don't quote excluded_args!
+  # PZ_PATH=$(find / ${excluded_args} -path "*${search_label}" -print -quit 2> /dev/null | sed "s#${search_label}##g")
+  find / ${excluded_args} -path "*${search_label}" -print -quit 2> /dev/null | sed "s#${search_label}##g"
+}
+
+# PZ_PATH contains Project Zomboid installed files. This path is needed for
+# mocks Project Zomboid server. Can be defined in env before running tests.sh script.
+# If not defined try to import from local config or find on disk.
+# Mostly located in ~/.local/share/Steam/steamapps/common/ProjectZomboid/projectzomboid.
+if [ -z "${PZ_PATH}" ]; then
+  echo -e "${INFO} PZ_PATH is not defined. Find Project Zomboid files..."
+
+  PZ_PATH=$(get_pz_path)
+
+  if [ -z "${PZ_PATH}" ]; then
+    echo -e "${FAIL} Cannot find installed Project Zomboid for getting needed lua files." >&2
+    echo -e "${INFO} Please define PZ_PATH env with path to Prozect Zomboid before executing test script." >&2
+    echo -e "${INFO} Or place MEDIA_LUA_PATH declaration to the configuration .env file" >&2
+
+    exit 1
+  fi
+
+  echo -e "${OK} PZ_PATH=${PZ_PATH}"
+fi
+
+# END TESTS RUNNER
+
+
 # main contains a proxy for entering permissible functions.
 function main() {
   init_variables
