@@ -278,7 +278,7 @@ if [ -z "${PZ_PATH}" ]; then
   if [ -z "${PZ_PATH}" ]; then
     echo -e "${FAIL} Cannot find installed Project Zomboid for getting needed lua files." >&2
     echo -e "${INFO} Please define PZ_PATH env with path to Prozect Zomboid before executing test script." >&2
-    echo -e "${INFO} Or place MEDIA_LUA_PATH declaration to the configuration .env file" >&2
+    echo -e "${INFO} Or place PZ_PATH declaration to the configuration .env file" >&2
 
     exit 1
   fi
