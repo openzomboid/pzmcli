@@ -270,6 +270,7 @@ function get_pz_path() {
 # mocks Project Zomboid server. Can be defined in env before running tests.sh script.
 # If not defined try to import from local config or find on disk.
 # Mostly located in ~/.local/share/Steam/steamapps/common/ProjectZomboid/projectzomboid.
+# TODO: Move to function.
 if [ -z "${PZ_PATH}" ]; then
   echo -e "${INFO} PZ_PATH is not defined. Find Project Zomboid files..."
 
