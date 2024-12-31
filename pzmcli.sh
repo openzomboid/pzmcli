@@ -24,12 +24,12 @@ FAIL=$(echo -e "[\033[0;31m fail \033[0m]")
 FULL_FILE=$(readlink -f "${BASH_SOURCE[@]}")
 BASEDIR=$(dirname "${FULL_FILE}")
 if [ "${BASEDIR}" == "." ]; then
-    BASEDIR=$(dirname "$BASH_SOURCE")
+  BASEDIR=$(dirname "$BASH_SOURCE")
 fi
 BASEFILE=$(basename "${FULL_FILE}")
 
 SCRIPT_LOCATION=${BASEDIR}
-MOD_LOCATION=${BASEDIR}
+MOD_LOCATION=$(pwd)
 
 DEFAULT_INSTALL_DIR=~/pzmcli
 
@@ -256,7 +256,12 @@ function self_update_dev() {
 
   echo "${INFO} dev upgrading pzmcli in ${install_dir}";
 
+  mkdir -p "${install_dir}/modules"
+
+  rm -rf "${install_dir}/modules/testsrunner"
+
   cp "${SCRIPT_LOCATION}/pzmcli.sh" "${install_dir}/pzmcli"
+  cp -r "${SCRIPT_LOCATION}/modules/testsrunner" "${install_dir}/modules/"
 
   echo "${OK} dev upgrade pzmcli in ${install_dir} succes";
 }
