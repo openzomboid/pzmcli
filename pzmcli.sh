@@ -71,6 +71,26 @@ function init_variables() {
   [ -z "${PZMCLI_SOURCE_LINK}" ] && PZMCLI_SOURCE_LINK="https://github.com/openzomboid/pzmcli/"
   [ -z "${PZMCLI_SOURCE_LINK_RAW}" ] && PZMCLI_SOURCE_LINK_RAW="https://raw.githubusercontent.com/openzomboid/pzmcli/master"
 
+  # PZ_PATH contains Project Zomboid installed files. This path is needed for
+  # mocks Project Zomboid server. Can be defined in env before running tests.sh script.
+  # If not defined try to import from local config or find on disk.
+  # Mostly located in ~/.local/share/Steam/steamapps/common/ProjectZomboid/projectzomboid.
+  if [ -z "${PZ_PATH}" ]; then
+    echo -e "${INFO} PZ_PATH is not defined. Find Project Zomboid files..."
+
+    PZ_PATH=$(get_pz_path)
+
+    if [ -z "${PZ_PATH}" ]; then
+      echo -e "${FAIL} Cannot find installed Project Zomboid for getting needed lua files." >&2
+      echo -e "${INFO} Please define PZ_PATH env with path to Prozect Zomboid before executing test script." >&2
+      echo -e "${INFO} Or place PZ_PATH declaration to the configuration .env file" >&2
+
+      exit 1
+    fi
+
+    echo -e "${OK} PZ_PATH=${PZ_PATH}"
+  fi
+
   # Mod definitions.
   DIR_TESTS="${MOD_LOCATION}/tests"
 }
@@ -248,8 +268,10 @@ function self_uninstall() {
   echo "${OK} uninstall pzmcli from ${install_dir} succes";
 }
 
-
+#
 # TESTS RUNNER
+#
+
 FAIL=$(echo -e "[\033[0;31m fail \033[0m]")
 
 function get_pz_path() {
@@ -266,29 +288,7 @@ function get_pz_path() {
   find / ${excluded_args} -path "*${search_label}" -print -quit 2> /dev/null | sed "s#${search_label}##g"
 }
 
-# PZ_PATH contains Project Zomboid installed files. This path is needed for
-# mocks Project Zomboid server. Can be defined in env before running tests.sh script.
-# If not defined try to import from local config or find on disk.
-# Mostly located in ~/.local/share/Steam/steamapps/common/ProjectZomboid/projectzomboid.
-# TODO: Move to function.
-if [ -z "${PZ_PATH}" ]; then
-  echo -e "${INFO} PZ_PATH is not defined. Find Project Zomboid files..."
-
-  PZ_PATH=$(get_pz_path)
-
-  if [ -z "${PZ_PATH}" ]; then
-    echo -e "${FAIL} Cannot find installed Project Zomboid for getting needed lua files." >&2
-    echo -e "${INFO} Please define PZ_PATH env with path to Prozect Zomboid before executing test script." >&2
-    echo -e "${INFO} Or place PZ_PATH declaration to the configuration .env file" >&2
-
-    exit 1
-  fi
-
-  echo -e "${OK} PZ_PATH=${PZ_PATH}"
-fi
-
 # END TESTS RUNNER
-
 
 # main contains a proxy for entering permissible functions.
 function main() {
