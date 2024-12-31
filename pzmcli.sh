@@ -82,14 +82,13 @@ function get_pz_path() {
   find / ${excluded_args} -path "*${search_label}" -print -quit 2> /dev/null | sed "s#${search_label}##g"
 }
 
-# init_variables creates pzmcli variables.
-function init_variables() {
-  # Project Zomboid Mod CLI definitions.
-  DIR_STATE="${SCRIPT_LOCATION}/state"
+# init_pzmcli_variables defines Project Zomboid Mod CLI variables.
+function init_pzmcli_variables() {
+  [ -z "${DIR_STATE}" ] && DIR_STATE="${SCRIPT_LOCATION}/state"
   [ -z "${PZMCLI_SOURCE_LINK}" ] && PZMCLI_SOURCE_LINK="https://github.com/openzomboid/pzmcli/"
   [ -z "${PZMCLI_SOURCE_LINK_RAW}" ] && PZMCLI_SOURCE_LINK_RAW="https://raw.githubusercontent.com/openzomboid/pzmcli/master"
 
-  if [ -z "${PZ_PATH}" ]; then
+  [ -z "${PZ_PATH}" ] && {
     echo -e "${INFO} PZ_PATH is not defined. Find Project Zomboid files..."
 
     PZ_PATH=$(get_pz_path)
@@ -99,15 +98,24 @@ function init_variables() {
       echo -e "${INFO} Please define PZ_PATH env with path to Prozect Zomboid before executing test script." >&2
       echo -e "${INFO} Or place PZ_PATH declaration to the configuration .env file" >&2
 
-      exit 1
+      return 1
     fi
 
     echo -e "${OK} PZ_PATH=${PZ_PATH}"
-  fi
+  }
 
-  DIR_TESTS="${SCRIPT_LOCATION}/modules/testsrunner"
+  [ -z "${DIR_TESTS}" ] && DIR_TESTS="${SCRIPT_LOCATION}/modules/testsrunner"
+}
 
-  # Mod definitions.
+# init_pzmcli_variables defines mod variables.
+function init_mod_variables() {
+  echo "${INFO} init mod variables is not implemented. Skip step"
+}
+
+# init_variables creates pzmcli variables.
+function init_variables() {
+  init_pzmcli_variables
+  init_mod_variables
 }
 
 # print_variables prints pzmcli variables.
