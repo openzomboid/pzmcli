@@ -18,7 +18,8 @@ AUTHOR="Pavel Korotkiy (outdead)"
 GREEN='\033[0;32m'; RED='\033[0;31m'; YELLOW='\033[0;33m'; BLUE='\033[0;36m'; NC='\033[0m'
 
 # Message types. Used when displaying messages in stdout.
-OK=$(echo -e "[ ${GREEN} OK ${NC} ]"); ER=$(echo -e "[ ${RED} ER ${NC} ]"); WARN=$(echo -e "[ ${YELLOW} YELLOW ${NC} ]"); INFO=$(echo -e "[ ${BLUE}INFO${NC} ]")
+OK=$(echo -e "[ ${GREEN} OK ${NC} ]"); ER=$(echo -e "[ ${RED} ER ${NC} ]"); WARN=$(echo -e "[ ${YELLOW} WARN ${NC} ]"); INFO=$(echo -e "[ ${BLUE}INFO${NC} ]")
+FAIL=$(echo -e "[\033[0;31m fail \033[0m]")
 
 FULL_FILE=$(readlink -f "${BASH_SOURCE[@]}")
 BASEDIR=$(dirname "${FULL_FILE}")
@@ -62,19 +63,32 @@ function is_symlink() {
   [ -L "$1" ] && echo "true" || echo "false"
 }
 
+# get_pz_path searches and returns Project Zomboid installation path.
+# PZ_PATH contains Project Zomboid installed files. This path is needed for
+# mocks Project Zomboid server. Can be defined in env before running tests.sh script.
+# If not defined try to import from local config or find on disk.
+# Mostly located in ~/.local/share/Steam/steamapps/common/ProjectZomboid/projectzomboid.
+function get_pz_path() {
+  local search_label="/media/lua/shared/luautils.lua"
+
+  # Exclude directories from search where Project Zomboid cannot be installed.
+  local excluded=(/proc /tmp /dev /sys /snap /etc /var /run /snap /boot)
+  for ex in "${excluded[@]}"; do
+    excluded_args="${excluded_args} -path ${ex} -prune -o"
+  done
+
+  # WARNING: don't quote excluded_args!
+  # PZ_PATH=$(find / ${excluded_args} -path "*${search_label}" -print -quit 2> /dev/null | sed "s#${search_label}##g")
+  find / ${excluded_args} -path "*${search_label}" -print -quit 2> /dev/null | sed "s#${search_label}##g"
+}
+
 # init_variables creates pzmcli variables.
 function init_variables() {
   # Project Zomboid Mod CLI definitions.
   DIR_STATE="${SCRIPT_LOCATION}/state"
-  DIR_CONFIG="${SCRIPT_LOCATION}/config"
-  FILE_PZMCLI_CONFIG="${SCRIPT_LOCATION}/pzmcli.cfg"
   [ -z "${PZMCLI_SOURCE_LINK}" ] && PZMCLI_SOURCE_LINK="https://github.com/openzomboid/pzmcli/"
   [ -z "${PZMCLI_SOURCE_LINK_RAW}" ] && PZMCLI_SOURCE_LINK_RAW="https://raw.githubusercontent.com/openzomboid/pzmcli/master"
 
-  # PZ_PATH contains Project Zomboid installed files. This path is needed for
-  # mocks Project Zomboid server. Can be defined in env before running tests.sh script.
-  # If not defined try to import from local config or find on disk.
-  # Mostly located in ~/.local/share/Steam/steamapps/common/ProjectZomboid/projectzomboid.
   if [ -z "${PZ_PATH}" ]; then
     echo -e "${INFO} PZ_PATH is not defined. Find Project Zomboid files..."
 
@@ -91,8 +105,9 @@ function init_variables() {
     echo -e "${OK} PZ_PATH=${PZ_PATH}"
   fi
 
+  DIR_TESTS="${SCRIPT_LOCATION}/modules/testsrunner"
+
   # Mod definitions.
-  DIR_TESTS="${MOD_LOCATION}/tests"
 }
 
 # print_variables prints pzmcli variables.
@@ -112,10 +127,8 @@ function print_variables() {
   echo "${INFO} BASEFILE:  ${BASEFILE}"
   echo "${INFO}"
 
-  echo "${INFO} SCRIPT_LOCATION:    ${SCRIPT_LOCATION}$(check_dir "${SCRIPT_LOCATION}")"
-  echo "${INFO} DIR_STATE:          ${DIR_STATE}$(check_dir "${DIR_STATE}")"
-  echo "${INFO} DIR_CONFIG:         ${DIR_CONFIG}$(check_dir "${DIR_CONFIG}")"
-  echo "${INFO} FILE_PZMCLI_CONFIG: ${FILE_PZMCLI_CONFIG}$(check_file "${FILE_PZMCLI_CONFIG}")"
+  echo "${INFO} SCRIPT_LOCATION: ${SCRIPT_LOCATION}$(check_dir "${SCRIPT_LOCATION}")"
+  echo "${INFO} DIR_STATE:       ${DIR_STATE}$(check_dir "${DIR_STATE}")"
   echo "${INFO}"
 
   echo "${INFO} MOD_LOCATION: ${MOD_LOCATION}$(check_dir "${MOD_LOCATION}")"
@@ -133,7 +146,7 @@ function print_version() {
 
 # save_config_example saves pzmlci config example.
 function save_config_example() {
-  bash -c "cat <<'EOF' > ${DIR_CONFIG}/pzmcli.example.cfg
+  bash -c "cat <<'EOF' > ${SCRIPT_LOCATION}/pzmcli.example.cfg
 #!/usr/bin/env bash
 
 # DIR_TESTS contains directory for test definitions.
@@ -157,7 +170,7 @@ function create_folders() {
   mkdir -p "${DIR_TESTS}"
 
   # Config.
-  save_config_example
+  # save_config_example
 
   echo "${OK} folders created"
 }
@@ -267,28 +280,6 @@ function self_uninstall() {
 
   echo "${OK} uninstall pzmcli from ${install_dir} succes";
 }
-
-#
-# TESTS RUNNER
-#
-
-FAIL=$(echo -e "[\033[0;31m fail \033[0m]")
-
-function get_pz_path() {
-  local search_label="/media/lua/shared/luautils.lua"
-
-  # Exclude directories from search where Project Zomboid cannot be installed.
-  local excluded=(/proc /tmp /dev /sys /snap /etc /var /run /snap /boot)
-  for ex in "${excluded[@]}"; do
-    excluded_args="${excluded_args} -path ${ex} -prune -o"
-  done
-
-  # WARNING: don't quote excluded_args!
-  # PZ_PATH=$(find / ${excluded_args} -path "*${search_label}" -print -quit 2> /dev/null | sed "s#${search_label}##g")
-  find / ${excluded_args} -path "*${search_label}" -print -quit 2> /dev/null | sed "s#${search_label}##g"
-}
-
-# END TESTS RUNNER
 
 # main contains a proxy for entering permissible functions.
 function main() {
