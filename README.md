@@ -10,3 +10,6 @@ Work in progress. Don't use yet.
 - Run tests to check mod.
 - Prepare mod release.
 - Make mod release to Steam without entering to Project Zomboid game.
+
+## TODO
+- Add VERSION file to mod
