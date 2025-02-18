@@ -239,6 +239,7 @@ function self_update() {
 
   if [ "${VERSION}" \< "${new_version}" ]; then
     mv "${update_dir}/pzmcli" "${SCRIPT_LOCATION}/pzmcli"
+    rm -f "$HOME/.local/bin/pzmcli" && ln -s "${install_dir}/pzmcli" "$HOME/.local/bin/pzmcli"
 
     echo "${INFO} pzmcli successfully updated"
   else
@@ -266,9 +267,7 @@ function self_update_dev() {
 
   echo "${INFO} dev upgrading pzmcli in ${install_dir}";
 
-  mkdir -p "${install_dir}/modules"
-
-  rm -rf "${install_dir}/modules/testsrunner"
+  rm -rf "${install_dir}/modules" && mkdir -p "${install_dir}/modules"
 
   cp -r "${SCRIPT_LOCATION}/modules/testsrunner" "${install_dir}/modules/"
   cp "${SCRIPT_LOCATION}/.env.dist" "${install_dir}/.env.dist"
@@ -276,6 +275,8 @@ function self_update_dev() {
   cp "${SCRIPT_LOCATION}/LICENSE" "${install_dir}/LICENSE"
   cp "${SCRIPT_LOCATION}/pzmcli.sh" "${install_dir}/pzmcli"
   cp "${SCRIPT_LOCATION}/README.md" "${install_dir}/README.md"
+
+  rm -f "$HOME/.local/bin/pzmcli" && ln -s "${install_dir}/pzmcli" "$HOME/.local/bin/pzmcli"
 
   echo "${OK} dev upgrade pzmcli in ${install_dir} succes";
 }
