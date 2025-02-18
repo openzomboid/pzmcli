@@ -16,7 +16,7 @@ Work in progress. Don't use yet.
 
 ## Install
 ```bash
-wget -O pzmcli.sh https://raw.githubusercontent.com/openzomboid/pzmcli/master/pzmcli.sh && chmod +x pzmcli.sh && ./pzmcli.sh self-install && rm pzmcli.sh
+wget -O pzmcli.sh https://raw.githubusercontent.com/openzomboid/pzmcli/master/pzmcli.sh && chmod +x pzmcli.sh && ./pzmcli.sh self-install pzmcli && rm pzmcli.sh
 ```
 
 ## Uninstall

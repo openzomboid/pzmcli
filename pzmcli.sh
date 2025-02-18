@@ -10,7 +10,7 @@
 
 # VERSION of Project Zomboid Mod CLI.
 # Follows semantic versioning, SEE: http://semver.org/.
-VERSION="0.0.0"
+VERSION="0.0.0.1"
 YEAR="2024"
 AUTHOR="Pavel Korotkiy (outdead)"
 
@@ -270,8 +270,12 @@ function self_update_dev() {
 
   rm -rf "${install_dir}/modules/testsrunner"
 
-  cp "${SCRIPT_LOCATION}/pzmcli.sh" "${install_dir}/pzmcli"
   cp -r "${SCRIPT_LOCATION}/modules/testsrunner" "${install_dir}/modules/"
+  cp "${SCRIPT_LOCATION}/.env.dist" "${install_dir}/.env.dist"
+  cp "${SCRIPT_LOCATION}/CHANGELOG.md" "${install_dir}/CHANGELOG.md"
+  cp "${SCRIPT_LOCATION}/LICENSE" "${install_dir}/LICENSE"
+  cp "${SCRIPT_LOCATION}/pzmcli.sh" "${install_dir}/pzmcli"
+  cp "${SCRIPT_LOCATION}/README.md" "${install_dir}/README.md"
 
   echo "${OK} dev upgrade pzmcli in ${install_dir} succes";
 }
