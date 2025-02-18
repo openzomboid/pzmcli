@@ -107,7 +107,7 @@ function init_pzmcli_variables() {
   [ -z "${DIR_TESTS}" ] && DIR_TESTS="${SCRIPT_LOCATION}/modules/testsrunner"
 }
 
-# init_pzmcli_variables defines mod variables.
+# init_mod_variables defines mod variables.
 function init_mod_variables() {
   echo "${INFO} init mod variables is not implemented. Skip step"
 }
@@ -186,7 +186,9 @@ function create_folders() {
 # self_install installs pzmcli from repository.
 # TODO: Add chose tags: version|latest|develop.
 function self_install() {
-  local install_dir=$DEFAULT_INSTALL_DIR
+  local install_dir=$1
+  [ -z "${install_dir}" ] && install_dir=$DEFAULT_INSTALL_DIR
+
   rm -rf "${install_dir}" && rm -f "$HOME/.local/bin/pzmcli" # TODO: Remove me.
   if [ "$(is_dir_exist "${install_dir}")" == "true" ]; then
     echo "${ER} ${install_dir} already exists"; return 0
@@ -300,7 +302,7 @@ function main() {
 
   case "$1" in
     self-install)
-      self_install ;;
+      self_install "$2";;
     self-update)
       local is_dev="false"
 

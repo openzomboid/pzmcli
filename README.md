@@ -13,3 +13,13 @@ Work in progress. Don't use yet.
 
 ## TODO
 - Add VERSION file to mod
+
+## Install
+```bash
+wget -O pzmcli.sh https://raw.githubusercontent.com/openzomboid/pzmcli/master/pzmcli.sh && chmod +x pzmcli.sh && ./pzmcli.sh self-install && rm pzmcli.sh
+```
+
+## Uninstall
+```bash
+pzmcli self-uninstall
+```
