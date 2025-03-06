@@ -149,7 +149,7 @@ function print_variables() {
 # print_version prints versions.
 function print_version() {
   echo "${INFO} pzmcli version ${VERSION}"
-#  echo "${INFO} mod version ${UTIL_RCON_VERSION}"
+  #echo "${INFO} mod version ${UTIL_RCON_VERSION}"
 }
 
 # save_config_example saves pzmlci config example.
